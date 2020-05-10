@@ -6,11 +6,7 @@ TARGET=bin/ray
 build: $(TARGET)
 
 run: $(TARGET)
-	./$(TARGET)	
-	feh render.ppm
-
-show: $(TARGET)
-	./$(TARGET)	
+	$(shell $$(time ./$(TARGET)))
 	feh render.ppm
 
 clean:
@@ -18,4 +14,4 @@ clean:
 	rm render.ppm
 
 $(TARGET): src/main.cpp $(SOURCES)
-	$(CXX) -o $@ src/main.cpp
+	$(CXX) -O2 -o $@ src/main.cpp
