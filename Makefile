@@ -1,9 +1,13 @@
 SOURCES=$(shell find src -type f -name "*.*")
 TARGET=bin/ray
 
-.PHONY: build
+.PHONY: build show run
 
 build: $(TARGET)
+
+run: $(TARGET)
+	./$(TARGET)	
+	feh render.ppm
 
 show: $(TARGET)
 	./$(TARGET)	

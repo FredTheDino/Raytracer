@@ -24,27 +24,30 @@ struct Sphere: public Hittable {
 Hit Sphere::hit(const Ray &ray, double t_min, double t_max) {
     Hit result = {};
 
-    Vec3 oc = ray.origin - center;
-    double a = ray.direction.length_squared();
-    double half_b = dot(oc, ray.direction);
-    double c = oc.length_squared() - radius * radius;
-    double disciminant = half_b * half_b - a * c;
-    result.valid = disciminant >= 0;
-    if (!result) return result;
-    double root = (-half_b - std::sqrt(disciminant)) / (a);
-    double temp = (-half_b - root) / a;
-    if (temp >= t_max || temp <= t_min) {
-        temp = (-half_b + root) / a;
-    }
-    std::cout << temp << std::endl;
-    result.t = temp;
-    result.point = ray.at(result.t);
-    result.normal = (result.point - center).normalized();
-    if (result.normal.length() > 1.0) {
-        std::cout << "LONGER!" << result.normal.length() << std::endl;
-    }
-    return result;
+    Vec3 distance = center - ray.origin;
+    double t_to_center = dot(distance, ray.direction);
+    Vec3 closest_point = ray.at(t_to_center);
+    double radius_squared = radius * radius;
+    double p_to_c = (closest_point - center).length_squared();
+    double discriminant = radius_squared - p_to_c;
 
+    if (discriminant < 0) return result; // Missed the sphere
+
+    double delta = sqrt(discriminant);
+    double potential = t_to_center - delta;
+
+    if (potential < t_min || t_max < potential) {
+        potential = t_to_center + delta;
+
+        if (potential < t_min || t_max < potential)
+            return result;
+    }
+
+    result.valid = true;
+    result.point = ray.at(potential);
+    // This is neat!
+    result.normal = (result.point - center) / radius;
+    return result;
 };
 
 

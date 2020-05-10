@@ -23,7 +23,6 @@ Color ray_color(const Ray &r) {
         Sphere sphere = Sphere(V(0, 0, -1), 0.5);
         Hit hit = sphere.hit(r, 0, 100);
         if (hit) {
-            std::cout << hit.normal << std::endl;
             return 0.5 * (hit.normal + V(1, 1, 1));
         }
     }
