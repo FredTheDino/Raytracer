@@ -6,7 +6,7 @@ TARGET=bin/ray
 build: $(TARGET)
 
 run: $(TARGET)
-	$(shell $$(time ./$(TARGET)))
+	$(shell $$(time $(TARGET)))
 	feh render.ppm
 
 clean:

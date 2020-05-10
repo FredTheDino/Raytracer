@@ -37,25 +37,25 @@ int main() {
     const int height = width / aspect_ratio;
     Color image[width][height];
 
+    std::ofstream output("render.ppm");
+    output << "P3" << std::endl << width << " " << height << std::endl;
+    output << "255" << std::endl;
+
     Point3 origo = {};
     Vec3 horizontal = {4, 0, 0};
     Vec3 vertical = {0, 2.25, 0};
     Vec3 lower_left = origo - horizontal / 2 - vertical / 2 - V(0, 0, 1);
-    for (int x = width - 1; x >= 0; --x) {
-        for (int y = 0; y < height; ++y) {
-            auto u = double(x) / double(width - 1);
-            auto v = double(y) / double(height - 1);
-            Ray r = {origo, (lower_left + u * horizontal + v * vertical).normalized()};
-            image[x][y] = ray_color(r);
-        }
-    }
-
-    std::ofstream output("render.ppm");
-    output << "P3" << std::endl << width << " " << height << std::endl;
-    output << "255" << std::endl;
     for (int y = height - 1; y >= 0; --y) {
         for (int x = width - 1; x >= 0; --x) {
-            write(output, image[x][y]);
+            auto u = double(x) / double(width - 1);
+            auto v = double(y) / double(height - 1);
+#if 1
+            Ray r = {origo, (lower_left + u * horizontal + v * vertical).normalized()};
+#else
+            Ray r = {origo, (lower_left + u * horizontal + v * vertical)};
+#endif
+            write(output, ray_color(r));
+            //image[x][y] = ray_color(r);
         }
     }
     output.close();
