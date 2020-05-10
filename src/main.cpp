@@ -20,7 +20,7 @@ void write(std::ostream &out, Color pixel) {
 
 Color ray_color(const Ray &r) {
     {
-        Sphere sphere = Sphere(V(0, 0, -1), 0.5);
+        Sphere sphere = Sphere(V(0.3, 0, -1), 0.5);
         Hit hit = sphere.hit(r, 0, 100);
         if (hit) {
             return 0.5 * (hit.normal + V(1, 1, 1));
@@ -33,7 +33,7 @@ Color ray_color(const Ray &r) {
 
 int main() {
     const double aspect_ratio = 16.0 / 9.0;
-    const int width = 384;
+    const int width = 384 * 10;
     const int height = width / aspect_ratio;
     Color image[width][height];
 
@@ -45,7 +45,7 @@ int main() {
         for (int y = 0; y < height; ++y) {
             auto u = double(x) / double(width - 1);
             auto v = double(y) / double(height - 1);
-            Ray r = {origo, lower_left + u * horizontal + v * vertical};
+            Ray r = {origo, (lower_left + u * horizontal + v * vertical).normalized()};
             image[x][y] = ray_color(r);
         }
     }

@@ -1,9 +1,16 @@
+#include <iostream>
 
 struct Hit {
     Point3 point;
     Vec3 normal;
     double t;
+    bool front_face;
     bool valid;
+
+    void normal_from_intersection(const Ray &ray, const Vec3 &outward) {
+        front_face = dot(ray.direction, outward) < 0;
+        normal = front_face ? outward : -outward;
+    }
 
     operator bool() { return valid; }
 };
@@ -27,8 +34,8 @@ Hit Sphere::hit(const Ray &ray, double t_min, double t_max) {
     Vec3 distance = center - ray.origin;
     double t_to_center = dot(distance, ray.direction);
     Vec3 closest_point = ray.at(t_to_center);
-    double radius_squared = radius * radius;
     double p_to_c = (closest_point - center).length_squared();
+    double radius_squared = radius * radius;
     double discriminant = radius_squared - p_to_c;
 
     if (discriminant < 0) return result; // Missed the sphere
@@ -44,9 +51,14 @@ Hit Sphere::hit(const Ray &ray, double t_min, double t_max) {
     }
 
     result.valid = true;
-    result.point = ray.at(potential);
+    result.t = potential;
+    result.point = ray.at(result.t);
     // This is neat!
-    result.normal = (result.point - center) / radius;
+    Vec3 outward = (result.point - center) / radius;
+    result.normal_from_intersection(ray, outward);
+    if (!result.front_face) {
+        std::cout << "WRONG!" << std::endl;
+    }
     return result;
 };
 
