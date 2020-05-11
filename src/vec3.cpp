@@ -13,6 +13,9 @@ struct Vec3 {
         double _[3];
     };
 
+    Vec3 &operator +=(const Vec3 &v);
+    Vec3 &operator -=(const Vec3 &v);
+
     Vec3 operator -() const;
     double length_squared() const;
     double length() const;
@@ -25,6 +28,10 @@ inline std::ostream& operator<<(std::ostream &out, const Vec3 &v) {
 }
 
 inline Vec3 operator +(const Vec3 &a, const Vec3 &b) {
+    return { a.x + b.x, a.y + b.y, a.z + b.z };
+}
+
+inline Vec3 operator +=(const Vec3 &a, const Vec3 &b) {
     return { a.x + b.x, a.y + b.y, a.z + b.z };
 }
 
@@ -42,6 +49,16 @@ inline Vec3 operator *( const double s, const Vec3 &v) {
 
 inline Vec3 operator /(const Vec3 &v, const double s) {
     return v * (1 / s);
+}
+
+Vec3 &Vec3::operator +=(const Vec3 &v) {
+    *this = *this + v;
+    return *this;
+}
+
+Vec3 &Vec3::operator -=(const Vec3 &v) {
+    *this = *this + v;
+    return *this;
 }
 
 Vec3 hadmard(const Vec3 &a, const Vec3 &b) {

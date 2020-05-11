@@ -1,35 +1,18 @@
 #include <iostream>
-
-struct Hit {
-    Point3 point;
-    Vec3 normal;
-    double t;
-    bool front_face;
-    bool valid;
-
-    void normal_from_intersection(const Ray &ray, const Vec3 &outward) {
-        front_face = dot(ray.direction, outward) < 0;
-        normal = front_face ? outward : -outward;
-    }
-
-    operator bool() { return valid; }
-};
-
-struct Hittable {
-    virtual Hit hit(const Ray &ray, double t_min, double t_max) = 0;
-};
+#include "hittable.h"
 
 struct Sphere: public Hittable {
     Point3 center;
     double radius;
+    Material *material;
 
-    Sphere(const Vec3 c, double r): center(c), radius(r) {};
+    Sphere(const Vec3 c, double r, Material *material): center(c), radius(r), material(material) {}
 
     Hit hit(const Ray &ray, double t_min, double t_max) override;
 };
 
 Hit Sphere::hit(const Ray &ray, double t_min, double t_max) {
-#if 1
+    // TODO(ed): Work through the math
     Hit result = {};
 
     Vec3 distance = center - ray.origin;
@@ -57,33 +40,6 @@ Hit Sphere::hit(const Ray &ray, double t_min, double t_max) {
     // This is neat!
     Vec3 outward = (result.point - center) / radius;
     result.normal_from_intersection(ray, outward);
-    if (!result.front_face) {
-        std::cout << "WRONG!" << std::endl;
-    }
+    result.material = material;
     return result;
-#else
-    Vec3 oc = ray.origin - center;
-    auto a = ray.direction.length_squared();
-    auto half_b = dot(oc, ray.direction);
-    auto c = oc.length_squared() - radius*radius;
-    auto discriminant = half_b*half_b - a*c;
-
-    Hit result = {};
-    if (discriminant > 0) {
-        auto root = std::sqrt(discriminant);
-        auto temp = (-half_b - root)/a;
-        if (temp > t_max && temp < t_min) {
-            temp = (-half_b + root) / a;
-        }
-        result.valid = temp < t_max && temp > t_min;
-        result.t = temp;
-        result.point = ray.at(result.t);
-        Vec3 outward = (result.point - center) / radius;
-        result.normal_from_intersection(ray, outward);
-    }
-    return result;
-#endif
 };
-
-
-
