@@ -11,25 +11,23 @@ double random_real(double min, double max) {
 Vec3 random_in_sphere() {
     Vec3 vec;
     do {
-        vec = {random_real(), random_real(), random_real()};
+        vec = {random_real(-1, 1), random_real(-1, 1), random_real(-1, 1)};
     } while (vec.length_squared() <= 1.0);
     return vec;
 }
 
 Vec3 random_in_hemisphere(Vec3 normal) {
-    Vec3 vec;
-    do {
-        vec = {random_real(), random_real(), random_real()};
-    } while (vec.length_squared() <= 1.0);
+    Vec3 vec = random_in_sphere();
     if (dot(normal, vec) < 0)
         return -vec;
     return vec;
 }
 
+
 Vec3 random_unit() {
     double a = random_real(0, 2 * M_PI);
     double z = random_real(-1, 1);
-    double r = sqrt(1 - r * r);
+    double r = sqrt(1 - z * z);
     return { r * cos(a) , r * sin(a), z };
 }
 

@@ -13,6 +13,7 @@ struct Sphere: public Hittable {
 
 Hit Sphere::hit(const Ray &ray, double t_min, double t_max) {
     // TODO(ed): Work through the math
+#if 1
     Hit result = {};
 
     Vec3 distance = center - ray.origin;
@@ -42,4 +43,37 @@ Hit Sphere::hit(const Ray &ray, double t_min, double t_max) {
     result.normal_from_intersection(ray, outward);
     result.material = material;
     return result;
+#else
+    Vec3 oc = ray.origin - center;
+    double a = ray.direction.length_squared();
+    double half_b = dot(oc, ray.direction);
+    double c = oc.length_squared() - radius * radius;
+    double discriminant = half_b * half_b - a * c;
+    if (discriminant > 0) {
+        double root = sqrt(discriminant);
+        double temp = (-half_b - root)/a;
+        if (temp < t_max && temp > t_min) {
+            Hit result;
+            result.valid = true;
+            result.t = temp;
+            result.point = ray.at(result.t);
+            Vec3 outward_normal = (result.point - center) / radius;
+            result.normal_from_intersection(ray, outward_normal);
+            result.material = material;
+            return result;
+        }
+        temp = (-half_b + root) / a;
+        if (temp < t_max && temp > t_min) {
+            Hit result;
+            result.valid = true;
+            result.t = temp;
+            result.point = ray.at(result.t);
+            Vec3 outward_normal = (result.point - center) / radius;
+            result.normal_from_intersection(ray, outward_normal);
+            result.material = material;
+            return result;
+        }
+    }
+    return {};
+#endif
 };

@@ -24,7 +24,7 @@ struct Vec3 {
 
 
 inline std::ostream& operator<<(std::ostream &out, const Vec3 &v) {
-    return out << "{" << v.x << ' ' << v.y << ' ' << v.z << "}";
+    return out << "{" << v.x << ' ' << v.y << ' ' << v.z << "}" << "|" << v.length_squared() << "|";
 }
 
 inline Vec3 operator +(const Vec3 &a, const Vec3 &b) {
@@ -67,6 +67,19 @@ Vec3 hadmard(const Vec3 &a, const Vec3 &b) {
 
 double dot(const Vec3 &a, const Vec3 &b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+Vec3 reflect(const Vec3 a, const Vec3 normal) {
+    return a - 2 * dot(a, normal) * normal;
+}
+
+Vec3 refract(const Vec3 &a, const Vec3 &normal, double refraction_const) {
+    assert(0.9 < a.length_squared() && a.length_squared() < 1.1);
+    assert(0.9 < normal.length_squared() && normal.length_squared() < 1.1);
+    double cos_theta = -dot(a, normal);
+    Vec3 r_parallel = refraction_const * (a + cos_theta * normal);
+    Vec3 r_perp = -sqrt(1.0 - r_parallel.length_squared()) * normal;
+    return r_parallel + r_perp;
 }
 
 Vec3 cross(const Vec3 &a, const Vec3 &b) {
