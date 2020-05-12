@@ -61,7 +61,7 @@ int main() {
     Sphere small = {V(0, 0, -1), 0.5, (Material *) &red_mat};
     Sphere large = {V(0, -100.5, -1), 100, (Material *) &blue_mat};
     Sphere metal_one = {V(-1, 0, -1), 0.5, (Material *) &metal};
-    Sphere glass_one = {V(1, 0, -1), 0.5, (Material *) &glass};
+    Sphere glass_one = {V(1, 0, -1), -0.5, (Material *) &glass};
     HittableList world = {&small, &large, &metal_one, &glass_one};
 
     const double zoom = 2.0;

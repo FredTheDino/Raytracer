@@ -37,10 +37,18 @@ struct Dielectric: public Material {
     Dielectric(double ior): index_of_refraction(ior) {};
 
     virtual std::pair<Color, Ray> scatter(const Ray &ray, const Hit &hit) const {
-        Vec3 reflection = reflect(ray.direction, hit.normal);
         double n = hit.front_face ? 1.0 / index_of_refraction : index_of_refraction;
-        Ray scatter = Ray(hit.point, refract(ray.direction, hit.normal, n));
+        Ray scatter;
         scatter.absorbed = false;
+        double cos_theta = std::fmin(-dot(ray.direction, hit.normal), 1.0);
+        double sin_theta = std::sqrt(1.0 - cos_theta * cos_theta);
+        if (n * sin_theta > 1.0 || random_real() < schlick(cos_theta, n)) {
+            // Reflection
+            scatter = Ray(hit.point, reflect(ray.direction, hit.normal));
+        } else {
+            // Refraction
+            scatter = Ray(hit.point, refract(ray.direction, hit.normal, n));
+        }
         return std::make_pair(C(1.0, 1.0, 1.0), scatter);
     }
 };
