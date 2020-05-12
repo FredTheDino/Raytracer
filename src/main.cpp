@@ -64,11 +64,7 @@ int main() {
     Sphere glass_one = {V(1, 0, -1), -0.5, (Material *) &glass};
     HittableList world = {&small, &large, &metal_one, &glass_one};
 
-    const double zoom = 2.0;
-    Point3 origo = {};
-    Vec3 horizontal = {zoom * aspect_ratio, 0, 0};
-    Vec3 vertical = {0, zoom, 0};
-    Vec3 lower_left = origo - horizontal / 2 - vertical / 2 - V(0, 0, 1);
+    Camera camera(M_PI * 0.4, aspect_ratio);
     for (int y = height - 1; y >= 0; --y) {
         std::cerr << "Progress: " << std::setprecision(3) << double(y) / height << "\r";
         for (int x = width - 1; x >= 0; --x) {
@@ -76,9 +72,7 @@ int main() {
             for (int sample = 0; sample < num_samples; sample++) {
                 double u = (x + random_real()) / double(width - 1);
                 double v = (y + random_real()) / double(height - 1);
-                Ray r = {origo, lower_left + u * horizontal + v * vertical};
-                r.normalize();
-                color += ray_color(r, world, 50);
+                color += ray_color(camera.get_ray(u, v), world, 50);
             }
             write(output, color / double(num_samples));
         }
