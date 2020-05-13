@@ -23,6 +23,10 @@ Vec3 random_in_hemisphere(Vec3 normal) {
     return vec;
 }
 
+Vec3 random_unit_disk() {
+    double a = random_real(0, 2 * M_PI);
+    return { cos(a), sin(a), 0 };
+}
 
 Vec3 random_unit() {
     double a = random_real(0, 2 * M_PI);

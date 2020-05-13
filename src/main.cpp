@@ -46,9 +46,9 @@ Color ray_color(const Ray &r, const HittableList &world, int depth) {
 
 int main() {
     const double aspect_ratio = 16.0 / 9.0;
-    const int width = 384;
+    const int width = 384 * 2;
     const int height = width / aspect_ratio;
-    const int num_samples = 50;
+    const int num_samples = 200;
 
     std::ofstream output("render.ppm");
     output << "P3" << std::endl << width << " " << height << std::endl;
@@ -64,7 +64,10 @@ int main() {
     Sphere glass_one = {V(1, 0, -1), -0.5, (Material *) &glass};
     HittableList world = {&small, &large, &metal_one, &glass_one};
 
-    Camera camera(M_PI * 0.4, aspect_ratio);
+    Vec3 from = V(-2, 2, 1);
+    Vec3 target = V(0, 0, -1);
+
+    Camera camera(from, target, V(0, 1, 0), M_PI * 0.3, aspect_ratio, 0.3, (from - target).length());
     for (int y = height - 1; y >= 0; --y) {
         std::cerr << "Progress: " << std::setprecision(3) << double(y) / height << "\r";
         for (int x = width - 1; x >= 0; --x) {

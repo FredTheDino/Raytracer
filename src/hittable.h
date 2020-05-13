@@ -28,20 +28,33 @@ struct Camera {
     Vec3 horizontal;
     Vec3 vertical;
 
-    Camera(double vfov, double aspect_ratio) {
-        origin = V(0, 0, 0);
+    double lens_radius;
+    Vec3 w, u, v;
+
+    Camera(Point3 lookfrom, Point3 lookat, Vec3 vup, double vfov, double aspect_ratio, double aperture, double focus_dist) {
+        origin = lookfrom;
+        lens_radius = aperture / 2;
 
         double half_height = std::tan(vfov / 2);
         double half_width = aspect_ratio * half_height;
 
-        lower_left = V(-half_width, -half_height, -1);
+        w = (lookfrom - lookat).normalized();
+        u = cross(vup, w).normalized();
+        v = cross(w, u);
 
-        horizontal = V(2 * half_width, 0, 0);
-        vertical = V(0, 2 * half_height, 0);
+        lower_left = origin
+                - half_width * focus_dist * u
+                - half_height * focus_dist * v
+                - focus_dist * w;
+
+        horizontal = 2 * focus_dist * half_width * u;
+        vertical = 2 * focus_dist * half_height * v;
     }
 
-    Ray get_ray(double u, double v) const {
-        return Ray(origin, lower_left + u * horizontal + v * vertical - origin);
+    Ray get_ray(double s, double t) const {
+        Vec3 source = lens_radius * random_unit_disk();
+        Vec3 offset = u * source.x + v * source.y;
+        return Ray(origin + offset, lower_left + s * horizontal + t * vertical - offset - origin);
     }
 };
 
