@@ -19,7 +19,7 @@ clean:
 	rm tags
 
 $(TARGET): src/main.cpp $(SOURCES) tags
-	$(CXX) -std=c++17 -O3 -o $@ src/main.cpp -pthread
+	$(CXX) -std=c++17 -O2 -o $@ src/main.cpp -pthread
 
 tags: $(SOURCES)
 	ctags -R src

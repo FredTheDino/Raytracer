@@ -51,9 +51,11 @@ const int num_threads = 4;
 
 volatile int finished;
 
-void raytrace(bool main, const Camera &camera, const HittableList &world, Color **buffer, int start, int end) {
+void raytrace(int t, const Camera &camera, const HittableList &world, Color **buffer, int start, int end) {
+    random_seed(0xCAFEBABE + t * t);
+
     for (int y = start; y < end; ++y) {
-        if (main)
+        if (t == 0)
             std::cerr << std::setprecision(3) << double(finished) / height << "\r";
         for (int x = width - 1; x >= 0; --x) {
             Color color = {};
@@ -97,7 +99,7 @@ int main() {
         int work_for_thread = (height / num_threads) + ((height % num_threads) > t);
         int end = start + work_for_thread;
         std::cerr << start << ", " << end << std::endl;
-        threads[t] = std::thread(raytrace, t == 0, camera, world, buffer, start, end);
+        threads[t] = std::thread(raytrace, t, camera, world, buffer, start, end);
         start = end;
     }
 
