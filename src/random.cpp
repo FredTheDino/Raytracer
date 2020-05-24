@@ -1,7 +1,10 @@
 #include <cstdlib>
+#include <random>
 
 double random_real() {
-    return rand() / (RAND_MAX + 1.0);
+    static thread_local std::mt19937 generator;
+    std::uniform_int_distribution<int> distribution(0, RAND_MAX);
+    return distribution(generator) / (RAND_MAX + 1.0);
 }
 
 double random_real(double min, double max) {
@@ -43,9 +46,9 @@ double clamp(double x, double min, double max) {
 }
 
 void write(std::ostream &out, Color pixel) {
-    assert(0 <= pixel.r && pixel.r <= 1.0);
-    assert(0 <= pixel.g && pixel.g <= 1.0);
-    assert(0 <= pixel.b && pixel.b <= 1.0);
+    // assert(0 <= pixel.r && pixel.r <= 1.0);
+    // assert(0 <= pixel.g && pixel.g <= 1.0);
+    // assert(0 <= pixel.b && pixel.b <= 1.0);
 
     auto cc = [](double x) { return clamp(std::sqrt(x), 0, 0.9999); };
 

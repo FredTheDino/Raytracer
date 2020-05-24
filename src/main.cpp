@@ -13,6 +13,7 @@
 
 #include <vector>
 #include <functional>
+#include <thread>
 
 using HittableList = std::vector<Hittable *>;
 
@@ -42,20 +43,40 @@ Color ray_color(const Ray &r, const HittableList &world, int depth) {
     return (1.0 - t) * C(1, 1, 1) + t * C(0.5, 0.7, 1.0);
 }
 
-// TODO(ed): Camera class
+const double aspect_ratio = 16.0 / 9.0;
+const int width = 384 * 2;
+const int height = width / aspect_ratio;
+const int num_samples = 200;
+const int num_threads = 4;
+
+volatile int finished;
+
+void raytrace(bool main, const Camera &camera, const HittableList &world, Color **buffer, int start, int end) {
+    for (int y = start; y < end; ++y) {
+        if (main)
+            std::cerr << std::setprecision(3) << double(finished) / height << "\r";
+        for (int x = width - 1; x >= 0; --x) {
+            Color color = {};
+            for (int sample = 0; sample < num_samples; sample++) {
+                double u = (x + random_real()) / double(width - 1);
+                double v = (y + random_real()) / double(height - 1);
+                color += ray_color(camera.get_ray(u, v), world, 50);
+            }
+            buffer[y][x] = color;
+        }
+        finished++;
+    }
+}
 
 int main() {
-    const double aspect_ratio = 16.0 / 9.0;
-    const int width = 384 * 2;
-    const int height = width / aspect_ratio;
-    const int num_samples = 200;
 
-    std::ofstream output("render.ppm");
-    output << "P3" << std::endl << width << " " << height << std::endl;
-    output << "255" << std::endl;
+    Color **buffer = new Color *[height];
+    for (int i = 0; i < height; i++) {
+        buffer[i] = new Color[width];
+    }
 
     Lambertian red_mat = {C(0.7, 0.2, 0.1)};
-    Lambertian blue_mat = {C(0.2, 0.6, 0.1)};
+    Lambertian blue_mat = {C(0.4, 0.4, 0.4)};
     Metal metal = {C(0.8, 0.6, 0.2), 0.5};
     Dielectric glass = {1.5};
     Sphere small = {V(0, 0, -1), 0.5, (Material *) &red_mat};
@@ -67,17 +88,29 @@ int main() {
     Vec3 from = V(-2, 2, 1);
     Vec3 target = V(0, 0, -1);
 
-    Camera camera(from, target, V(0, 1, 0), M_PI * 0.3, aspect_ratio, 0.3, (from - target).length());
+    Camera camera(from, target, V(0, 1, 0), M_PI * 0.3, aspect_ratio, 0.01, (from - target).length());
+
+    int start = 0;
+    std::thread threads[num_threads];
+    std::cerr << "Starting" << std::endl;
+    for (int t = 0; t < num_threads; t++) {
+        int work_for_thread = (height / num_threads) + ((height % num_threads) > t);
+        int end = start + work_for_thread;
+        std::cerr << start << ", " << end << std::endl;
+        threads[t] = std::thread(raytrace, t == 0, camera, world, buffer, start, end);
+        start = end;
+    }
+
+    for (int t = 0; t < num_threads; t++) {
+        threads[t].join();
+    }
+
+    std::ofstream output("render.ppm");
+    output << "P3" << std::endl << width << " " << height << std::endl;
+    output << "255" << std::endl;
     for (int y = height - 1; y >= 0; --y) {
-        std::cerr << "Progress: " << std::setprecision(3) << double(y) / height << "\r";
         for (int x = width - 1; x >= 0; --x) {
-            Color color = {};
-            for (int sample = 0; sample < num_samples; sample++) {
-                double u = (x + random_real()) / double(width - 1);
-                double v = (y + random_real()) / double(height - 1);
-                color += ray_color(camera.get_ray(u, v), world, 50);
-            }
-            write(output, color / double(num_samples));
+            write(output, buffer[y][x] / double(num_samples));
         }
     }
     output.close();
